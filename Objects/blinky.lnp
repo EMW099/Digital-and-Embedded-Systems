@@ -1,0 +1,3 @@
+".\Objects\task2.obj" 
+TO ".\Objects\blinky" 
+PRINT(".\Listings\blinky.m51") RAMSIZE(256) 
