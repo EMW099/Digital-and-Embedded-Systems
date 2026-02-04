@@ -1,4 +1,4 @@
-/*; Demo Program - using timer interrupts.
+; Demo Program - using timer interrupts.
 ; Written for ADuC841 evaluation board, with UCD extras.
 ; Generates a square wave on P3.6.
 ; Brian Mulkeen, September 2016
@@ -13,15 +13,29 @@ CSEG
 		ORG		0000h		; set origin at start of code segment
 		JMP		MAIN		; jump to start of main program
 		
-		ORG		000Bh		; Timer 0 overflow interrupt address
-		JMP		TF0ISR		; jump to interrupt service routine
+		ORG		002Bh		; Timer 2 overflow interrupt address
+		JMP		TF2ISR		; jump to interrupt service routine
 
 		ORG		0060h		; set origin above interrupt addresses	
 MAIN:	
 ; ------ Setup part - happens once only ----------------------------
-		MOV		TMOD, #00h	; Timer 0 as a timer, mode 0, not gated
-		MOV		IE, #82h	; enable Timer 0 overflow interrupt
-		SETB	TR0			; start Timer 0
+        ; timer2 config
+		; Need to find what the actual desired value of reload is
+        MOV     RCAP2H, #0DCh   ; reload high
+        MOV     RCAP2L, #0CDh    ; reload low
+        MOV     TH2,    #0DCh   ; counter high
+        MOV     TL2,    #0CDh    ; counter low 
+
+        CLR     TF2             ; clear timer2 overflow flag
+        CLR     EXF2            ; clear timer2 external flag
+
+		; Timer 2 config start time counter only thing to set to 1 
+		; TF2 EXF2 RCLK TCLK EXEN2 TR2 C/T2 CP/RL2 
+		; 0   0    0    0    0     1   0    0
+        MOV     T2CON,  #04h    ;
+        SETB    ET2             ; enable Timer2 interrupt
+        SETB    EA              ; global enable
+
 
 ; ------ Loop forever (in this example, doing nothing) -------------
 LOOP:	NOP					; this does nothing, uses 1 clock cycle
@@ -29,12 +43,15 @@ LOOP:	NOP					; this does nothing, uses 1 clock cycle
 
 		
 ; ------ Interrupt service routine ---------------------------------	
-TF0ISR:		; Timer 0 overflow interrupt service routine
+TF2ISR:		; Timer 0 overflow interrupt service routine
+		CLR TF2				; reset overflow flag
 		CPL		SOUND		; change state of output pin
 		RETI				; return from interrupt
 ; ------------------------------------------------------------------	
 		
-END*/
+END
+	
+/*
 ;********************************************************************
 ; Example program for Analog Devices EVAL-ADuC841 board.
 ; Based on example code from Analog Devices, 
@@ -81,5 +98,6 @@ LOOKUP: XCH A, R1
 		XCH A, R1
 		RET
 END
+*/
 	
 	
